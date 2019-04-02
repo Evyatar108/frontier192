@@ -376,7 +376,6 @@ for c in ccs:
 		c = c.to_undirected()
 		c = remove_double_edges(c)
 		c = graph_vsize_attd(c)
-		spectral(c)
 		"""	
 		print("Transformed to undirected graph")
 		in_d = sorted(c.degree,key=lambda x:x[1],reverse=True)
@@ -390,8 +389,6 @@ for c in ccs:
 				print("combine_grop_in_graph: c.nodes["+vi+"]['size'] = "+str(c.nodes[vi]['size']))
 				#print("Number of nodes = "+str(len(c)) + ", Number of Edges = "+str(len(c.edges)))
 		print("Number of nodes = "+str(len(c)))
-		"""
-
 		"""
 		A = set()
 		dN = set()
@@ -409,10 +406,8 @@ for c in ccs:
 			print("Group |Deleted| = "+str(len(dN)))
 			
 			ratio = len(A)/(len(B)+len(A))
-		"""
-
-
-		"""	
+			
+			
 		print("END Cut:")
 		print("Group |A| = "+str(len(A)))
 		print("Group |B| = "+str(len(B)))
@@ -427,9 +422,6 @@ for c in ccs:
 		
 		A = regroup(c,A,dN)
 		"""
-
-
-		"""
 		print("Actual size (including combined nodes):")
 		lsize = list()
 		for gc in ccsc:
@@ -439,10 +431,7 @@ for c in ccs:
 			lsize.append([len(gc),l])
 		print(lsize)
 		"""
-
-
-
-"""		
+		
 		print("####")
 		save_object(c,"reduced_1d_cluster.pickle")	
 		with open("Edges20_.csv","w") as f:
@@ -467,4 +456,3 @@ with open("wccg.dat","w") as f:
 			s += str(vi) + " "
 		f.write(s+"\n")
 	
-"""

@@ -2,11 +2,12 @@ import numpy as np
 import networkx as nx
 from sklearn.cluster import SpectralClustering
 from sklearn import metrics
-from graph_constraction import load_object
+import pickle
 np.random.seed(1)
 
 
-G = load_object("nx_graph.pickle")
+pickle_in = open("nx_graph.pickle", "rb")
+G = pickle.load(pickle_in)
 adj_mat = nx.to_numpy_matrix(G)
 
 sc = SpectralClustering(2, affinity='precomputed', n_init=100)
