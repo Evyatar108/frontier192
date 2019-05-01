@@ -1,0 +1,4 @@
+venv
+nx_graph.pickle
+.idea
+*.iml
