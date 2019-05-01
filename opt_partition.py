@@ -1,8 +1,6 @@
-import numpy as np
 import networkx as nx
 from sklearn.cluster import SpectralClustering
 import pickle
-np.random.seed(1)
 
 
 def find_opt_partiton(G: nx.DiGraph):
