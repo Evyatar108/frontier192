@@ -1,34 +1,60 @@
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import List, Set
+
 import networkx as nx
-from sklearn.cluster import SpectralClustering
 import pickle
 
+from sklearn import cluster
 
-def find_opt_partiton(G: nx.DiGraph):
-    adj_mat = nx.to_numpy_matrix(G)
 
-    sc = SpectralClustering(2, affinity='precomputed', n_init=100)
-    sc.fit(adj_mat)
-
-    print('spectral clustering')
-
+def __partition_by_labels(G, labels):
     biGraph = nx.Graph()
-    node_to_label = {node: label for node, label in zip(G.nodes, sc.labels_)}
+    node_to_label = {node: label for node, label in zip(G.nodes, labels)}
+
+    clusters_dict = defaultdict(set)
+    for node, label in node_to_label.items():
+        clusters_dict[label].add(node)
+    B = max(clusters_dict.values(), key=len)
+
+    node_to_label = {node: 0 if node in B else 1 for node in G.nodes}
 
     for node, label in node_to_label.items():
         for adj_node in G.adj[node].keys():
             if node_to_label[adj_node] != node_to_label[node]:
                 biGraph.add_edge(node, adj_node)
 
-    matching = nx.bipartite.maximum_matching(biGraph) # use hopcroft-karp algorithm
+    B_bigraph = biGraph.subgraph(B)
 
-    nodes_to_remove = nx.bipartite.to_vertex_cover(biGraph, matching)
+    matching = nx.bipartite.maximum_matching(biGraph, top_nodes=B_bigraph)  # use hopcroft-karp algorithm
 
-    G.remove_nodes_from(nodes_to_remove)
+    nodes_to_remove = nx.bipartite.to_vertex_cover(biGraph, matching, top_nodes=B_bigraph)
 
-    A = [node for node in G.nodes if node_to_label[node] == 0]
-    B = [node for node in G.nodes if node_to_label[node] == 1]
+    B = B.difference(nodes_to_remove)
+    A = set(G.nodes).difference(B).difference(nodes_to_remove)
 
     return A, B, nodes_to_remove
+
+
+def find_opt_partiton_kmeans(G: nx.DiGraph):
+    adj_mat = nx.to_scipy_sparse_matrix(G)
+    kmeans = cluster.KMeans(n_clusters=2, n_init=10)
+    kmeans.fit(adj_mat)
+    return __partition_by_labels(G, kmeans.labels_)
+
+
+def find_opt_partiton_spectral(G: nx.DiGraph):
+    adj_mat = nx.to_scipy_sparse_matrix(G)
+    sc = cluster.SpectralClustering(10, affinity='precomputed', n_init=10)
+    sc.fit(adj_mat)
+    return __partition_by_labels(G, sc.labels_)
+
+
+def find_opt_partiton_dbscan(G: nx.DiGraph):
+    adj_mat = nx.to_scipy_sparse_matrix(G)
+    sc = cluster.DBSCAN(metric='precomputed')
+    sc.fit(adj_mat)
+    return __partition_by_labels(G, sc.labels_)
 
 
 if __name__ == '__main__':

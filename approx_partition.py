@@ -37,8 +37,9 @@ def __remove_cut_min_vertex_cover(G, A, B):
     return A, B, nodes_to_remove
 
 
-def __partition_approx_iteration(G, V):
+def find_approx_partition(G):
     print("Partition connected component")
+    V = set(G)
     A = set(np.random.choice(G, int((len(V) / 3) * 2)))
     B = V.difference(A)
     print("Random cut separation")
@@ -80,29 +81,4 @@ def __partition_approx_iteration(G, V):
     print("Remove neighboring nodes")
 
     A, B, deleted_nodes = __remove_cut_min_vertex_cover(G, A, B)
-    return A, B, deleted_nodes
-
-
-def partition_approx(G):
-    A = set()
-    B_subgraph = G
-    B = set(B_subgraph)
-    new_B = B
-    deleted_nodes = set()
-    thresh = 0.5
-    ratio = 0.1
-    while ratio < thresh:
-        deleted_nodes_ext = G.nodes()
-        A_ext = set()
-        for i in range(10):
-            temp_A_ext, temp_B, temp_deleted_nodes_ext = __partition_approx_iteration(B_subgraph, B)
-            if len(deleted_nodes_ext) > len(temp_deleted_nodes_ext):
-                deleted_nodes_ext = temp_deleted_nodes_ext
-                A_ext = temp_A_ext
-                new_B = temp_B
-        B = new_B
-        A.update(A_ext)
-        deleted_nodes.update(deleted_nodes_ext)
-        B_subgraph = G.subgraph(B)
-        ratio = len(A) / (len(B) + len(A))
     return A, B, deleted_nodes
