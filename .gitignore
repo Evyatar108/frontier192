@@ -2,3 +2,4 @@ venv
 nx_graph.pickle
 .idea
 *.iml
+__pycache__
