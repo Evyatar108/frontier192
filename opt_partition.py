@@ -45,7 +45,7 @@ def find_opt_partiton_kmeans(G: nx.DiGraph):
 
 def find_opt_partiton_spectral(G: nx.DiGraph):
     adj_mat = nx.to_scipy_sparse_matrix(G)
-    sc = cluster.SpectralClustering(10, affinity='precomputed', n_init=10)
+    sc = cluster.SpectralClustering(2, affinity='precomputed', n_init=100)
     sc.fit(adj_mat)
     return __partition_by_labels(G, sc.labels_)
 

@@ -101,6 +101,7 @@ nV = len(G)
 
 print("Calculated connected components")
 nodes_clusters = []
+deleted_nodes = []
 for connected_component_subgraph in connected_components_subgraphs:
     if len(connected_component_subgraph) > (nV / 2):
         A, B, deleted_nodes = partition(connected_component_subgraph)
@@ -112,3 +113,5 @@ for connected_component_subgraph in connected_components_subgraphs:
         nodes_clusters.append(B)
     else:
         nodes_clusters.append(connected_component_subgraph.nodes())
+
+save_object(deleted_nodes, "deleted_nodes.pickle")
