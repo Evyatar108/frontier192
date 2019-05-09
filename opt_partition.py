@@ -1,6 +1,4 @@
 from collections import defaultdict
-from dataclasses import dataclass
-from typing import List, Set
 
 import networkx as nx
 import pickle
@@ -36,21 +34,21 @@ def __partition_by_labels(G, labels):
     return A, B, nodes_to_remove
 
 
-def find_opt_partiton_kmeans(G: nx.DiGraph):
+def find_opt_partiton_kmeans(G):
     adj_mat = nx.to_scipy_sparse_matrix(G)
     kmeans = cluster.KMeans(n_clusters=2, n_init=10)
     kmeans.fit(adj_mat)
     return __partition_by_labels(G, kmeans.labels_)
 
 
-def find_opt_partiton_spectral(G: nx.DiGraph):
+def find_opt_partiton_spectral(G, clusters_num):
     adj_mat = nx.to_scipy_sparse_matrix(G)
-    sc = cluster.SpectralClustering(2, affinity='precomputed', n_init=100)
+    sc = cluster.SpectralClustering(clusters_num, affinity='precomputed', n_init=100)
     sc.fit(adj_mat)
     return __partition_by_labels(G, sc.labels_)
 
 
-def find_opt_partiton_dbscan(G: nx.DiGraph):
+def find_opt_partiton_dbscan(G):
     adj_mat = nx.to_scipy_sparse_matrix(G)
     sc = cluster.DBSCAN(metric='precomputed')
     sc.fit(adj_mat)

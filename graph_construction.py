@@ -10,6 +10,8 @@ import networkx as nx
 import pickle
 
 np.random.seed(1)
+clusters_num = 10
+print('clusters num each opt iteration: ' + clusters_num)
 
 def save_object(V, path):
     pickle_out = open(path, "wb")

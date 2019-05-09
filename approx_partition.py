@@ -30,9 +30,9 @@ def __remove_cut_min_vertex_cover(G, A, B):
     A = A.difference(nodes_to_remove)
     B = B.difference(nodes_to_remove)
 
-    print(f'size of newA group: {len(A)}')
-    print(f'size of newB group: {len(B)}')
-    print(f'number of deleted nodes: {len(nodes_to_remove)}')
+    print('size of newA group:' + str(len(A)))
+    print('size of newB group:' + str(len(B)))
+    print('number of deleted nodes: ' + str(len(nodes_to_remove)))
 
     return A, B, nodes_to_remove
 
