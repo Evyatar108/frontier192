@@ -1,7 +1,8 @@
 from collections import defaultdict
-
+from itertools import chain
+import kaHIP
 import networkx as nx
-import pickle
+import metis
 
 from sklearn import cluster
 
@@ -36,16 +37,27 @@ def __partition_by_labels(G, labels):
 
 def find_opt_partiton_kmeans(G):
     adj_mat = nx.to_scipy_sparse_matrix(G)
-    kmeans = cluster.KMeans(n_clusters=2, n_init=10)
+    kmeans = cluster.KMeans(n_clusters=2, n_init=1)
     kmeans.fit(adj_mat)
     return __partition_by_labels(G, kmeans.labels_)
 
 
-def find_opt_partiton_spectral(G, clusters_num):
+def find_opt_partition_spectral(G, clusters_num):
     adj_mat = nx.to_scipy_sparse_matrix(G)
-    sc = cluster.SpectralClustering(clusters_num, affinity='precomputed', n_init=100)
+    sc = cluster.SpectralClustering(clusters_num, affinity='precomputed', n_init=1, eigen_solver='amg')
     sc.fit(adj_mat)
     return __partition_by_labels(G, sc.labels_)
+
+def find_opt_partition_cuts(G: nx.Graph):
+    node_cuts = list(nx.all_node_cuts(G))
+    nodes_to_remove = set(chain.from_iterable(node_cuts))
+    V = set(G)
+    AB_nodes = V.difference(nodes_to_remove)
+    new_G = G.subgraph(AB_nodes)
+    B_subgraph = max(nx.connected_component_subgraphs(new_G), key=len)
+    B = set(B_subgraph)
+    A = set(node for node in new_G if node not in B)
+    return A, B, nodes_to_remove
 
 
 def find_opt_partiton_dbscan(G):
@@ -55,7 +67,25 @@ def find_opt_partiton_dbscan(G):
     return __partition_by_labels(G, sc.labels_)
 
 
-if __name__ == '__main__':
-    pickle_in = open("nx_graph.pickle", "rb")
-    G = pickle.load(pickle_in)
-    find_opt_partiton(G)
+def find_opt_partition_kahip(G: nx.Graph):
+    node_list = list(G)
+    node_to_index = {node_list[index]:index for index in range(len(node_list))}
+    xadj = [0]
+    sum = 0
+    for v in node_list:
+        n_neighbores = len(list(G.neighbors(v)))
+        xadj.append(sum + n_neighbores)
+        sum += n_neighbores
+
+    adjncy = []
+    for v in node_list:
+        for u in G.neighbors(v):
+            adjncy.append(node_to_index[u])
+
+    num_of_deleted_nodes, deleted_nodes_indexes = kaHIP.node_separator(len(G), None, xadj, None, adjncy, 2, 0.03, True, 1, kaHIP.STRONG)
+    deleted_nodes = set(node_list[deleted_node_index] for deleted_node_index in deleted_nodes_indexes)
+    new_G = G.subgraph(set(G).difference(deleted_nodes))
+    B_subgraph = max(nx.connected_component_subgraphs(new_G), key=len)
+    B = set(B_subgraph)
+    A = set(node for node in new_G if node not in B)
+    return A, B, deleted_nodes

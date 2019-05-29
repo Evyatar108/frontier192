@@ -1,6 +1,6 @@
 from networkx import DiGraph
 
-from opt_partition import find_opt_partiton
+from opt_partition import find_opt_partition_kahip, find_opt_partition_spectral
 
 G = DiGraph()
 G.add_edge(6, 2, weight=0.51)
@@ -32,7 +32,12 @@ G.add_edge(7, 4, weight=0.5678)
 G.add_edge(8, 7, weight=0.67868)
 G.add_edge(17, 9, weight=0.5986)
 
-find_opt_partiton(G)
+nodes_to_remove = find_opt_partition_kahip(G.to_undirected())
+print(f'nodes to remove = {nodes_to_remove}')
+
+A, B, nodes_to_remove = find_opt_partition_spectral(G.to_undirected(), 2)
+print(f'nodes to remove = {nodes_to_remove}')
+print('|A| = ' + str(len(A)) + ', |B| = ' + str(len(B)) + ', |nodes_to_remove| = ' + str(len(nodes_to_remove)))
 
 
 
