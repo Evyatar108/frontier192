@@ -82,7 +82,7 @@ def find_opt_partition_kahip(G: nx.Graph):
         for u in G.neighbors(v):
             adjncy.append(node_to_index[u])
 
-    num_of_deleted_nodes, deleted_nodes_indexes = kaHIP.node_separator(len(G), None, xadj, None, adjncy, 2, 0.03, True, 1, kaHIP.STRONG)
+    num_of_deleted_nodes, deleted_nodes_indexes = kaHIP.node_separator(len(G), None, xadj, None, adjncy, 2, 0.90, True, 1, kaHIP.STRONG)
     deleted_nodes = set(node_list[deleted_node_index] for deleted_node_index in deleted_nodes_indexes)
     new_G = G.subgraph(set(G).difference(deleted_nodes))
     B_subgraph = max(nx.connected_component_subgraphs(new_G), key=len)

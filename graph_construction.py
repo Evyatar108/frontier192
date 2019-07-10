@@ -58,20 +58,26 @@ def try_load_cached_partition(path):
 
 
 def partition(G):
-    thresh = 0.5
+    thresh = 0.3
     ratio = 0.1
 
-    A, B, deleted_nodes = find_opt_partition_kahip(G)
-    A_cached, B_cached, deleted_nodes_cached = try_load_cached_partition('kahip_cache.pickle')
-    if len(deleted_nodes) < len(deleted_nodes_cached):
-        save_object((A, B, deleted_nodes), 'kahip_cache.pickle')
-        print('Improved cached kahip from ' + str(len(deleted_nodes_cached)) + ' deleted nodes to ' + str(
-            len(deleted_nodes)) + ' deleted nodes')
-    else:
-        A, B, deleted_nodes = A_cached, B_cached, deleted_nodes_cached
-        print('Loaded cached kahip partition, no improvement found')
+    # A, B, deleted_nodes = find_opt_partition_kahip(G)
+    # A_cached, B_cached, deleted_nodes_cached = try_load_cached_partition('kahip_cache.pickle')
+    # if len(deleted_nodes) < len(deleted_nodes_cached):
+    #     save_object((A, B, deleted_nodes), 'kahip_cache.pickle')
+    #     print('Improved cached kahip from ' + str(len(deleted_nodes_cached)) + ' deleted nodes to ' + str(
+    #         len(deleted_nodes)) + ' deleted nodes')
+    # else:
+    #     A, B, deleted_nodes = A_cached, B_cached, deleted_nodes_cached
+    #     print('Loaded cached kahip partition, no improvement found')
 
+    connected_components_subgraphs = nx.connected_component_subgraphs(G)
+
+    B_subgraph = max(connected_components_subgraphs, key=len)
+    B = set(B_subgraph)
+    A = set(G).difference(B)
     ratio = len(A) / (len(B) + len(A))
+    deleted_nodes = set()
     new_B = B
     B_subgraph = G.subgraph(B)
 
@@ -80,11 +86,11 @@ def partition(G):
     print('Current |B| = ' + str(len(B)))
     print('ratio = ' + str(ratio))
 
-    while False: # ratio < thresh:
+    while ratio < thresh:
         deleted_nodes_ext = G.nodes()
         A_ext = set()
-        for i in range(10):
-            temp_A_ext, temp_B, temp_deleted_nodes_ext = find_opt_partition_spectral(B_subgraph, clusters_num)
+        for i in range(1):
+            temp_A_ext, temp_B, temp_deleted_nodes_ext = find_opt_partition_spectral(B_subgraph, 2)
             if len(temp_A_ext) / len(temp_deleted_nodes_ext) > len(A_ext) / len(deleted_nodes_ext):
                 deleted_nodes_ext = temp_deleted_nodes_ext
                 A_ext = temp_A_ext
@@ -129,7 +135,7 @@ G = remove_edges_with_weight_of(G, 0.3)
 G = G.to_undirected()
 G = remove_double_edges(G)
 G = graph_vsize_attd(G)
-connected_components_subgraphs = nx.connected_component_subgraphs(G)
+
 print("Number of |G.V| = " + str(len(set(G))) + ", Number of |G.E| = " + str(len(set(G.edges))))
 nodes_clusters = []
 
